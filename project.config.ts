@@ -106,6 +106,7 @@ const appConfig = {
       sameAs: [
         "https://www.linkedin.com/in/govindnagar",
         "https://github.com/govind-codex",
+        "https://x.com/Govindnagar__",
       ],
       jobTitle: "Software Developer",
       worksFor: { "@type": "Organization", name: "IndoRyque Technologies" },
@@ -115,14 +116,14 @@ const appConfig = {
   social: {
     github: "https://github.com/govind-codex",
     linkedin: "https://www.linkedin.com/in/govindnagar",
-    twitter: "https://github.com/govind-codex",
+    twitter: "https://x.com/Govindnagar__",
     "cal.com": "https://cal.com/govind-nagar-oufzbo",
   },
 
   usernames: {
     github: "govind-codex",
     youtube: "govind-codex",
-    twitter: "govind-codex",
+    twitter: "Govindnagar__",
     linkedin: "govindnagar",
     medium: "",
   },
