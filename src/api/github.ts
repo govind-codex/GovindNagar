@@ -1164,6 +1164,6 @@ export const getHeroOrbitDataSafe = cache(
  */
 export async function revalidateHeroOrbit(): Promise<void> {
   const { revalidateTag } = await import("next/cache");
-  revalidateTag("hero-orbit");
-  revalidateTag("page");
+  revalidateTag("hero-orbit", "max");
+  revalidateTag("page", "max");
 }
