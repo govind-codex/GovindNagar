@@ -73,6 +73,11 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const gaId =
+    process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ||
+    appConfig.analytics.site.measurementId ||
+    appConfig.verifications["google.analytics"];
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -104,8 +109,8 @@ export default function RootLayout({
           id="json-ld-personal"
         />
 
-        {(process.env.NODE_ENV === "production" && appConfig.verifications["google.analytics"]) && (
-          <GoogleAnalytics gaId={appConfig.verifications["google.analytics"]} />
+        {process.env.NODE_ENV === "production" && gaId && (
+          <GoogleAnalytics gaId={gaId} />
         )}
       </body>
     </html>

@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { appConfig } from "root/project.config";
-import { getSiteResult } from "~/lib/analytics/service";
+import { getSiteRealtimeResult, getSiteResult } from "~/lib/analytics/service";
 import { generateMetadata as buildMetadata } from "~/utils/seo";
 import AnalyticsClient from "./client";
 
@@ -8,8 +8,8 @@ export const revalidate = 3600;
 
 export default async function AnalyticsPage() {
   const host = (await headers()).get("host")?.replace(/^www\./, "") || appConfig.siteUrl;
-  const result = await getSiteResult(host);
-  return <AnalyticsClient result={result} />;
+  const [result, realtime] = await Promise.all([getSiteResult(host), getSiteRealtimeResult()]);
+  return <AnalyticsClient result={result} initialRealtime={realtime} />;
 }
 
 export const metadata = buildMetadata({

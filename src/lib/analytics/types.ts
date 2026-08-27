@@ -28,6 +28,18 @@ export interface AnalyticsBreakdownItem {
   value: number;
 }
 
+export interface RealtimeAnalytics {
+  ok: boolean;
+  error: string | null;
+  activeUsers: number;
+  pageViews: number;
+  windowMinutes: number;
+  topPages: AnalyticsBreakdownItem[];
+  topCountries: AnalyticsBreakdownItem[];
+  devices: AnalyticsBreakdownItem[];
+  generatedAt: string;
+}
+
 export interface AnalyticsSnapshot {
   source: AnalyticsSource;
   live: boolean;

@@ -71,6 +71,61 @@ async function runReport(token: string, propertyId: string, body: Record<string,
   return (await res.json()) as { rows?: GaRow[] };
 }
 
+async function runRealtimeReport(token: string, propertyId: string, body: Record<string, unknown>) {
+  const res = await fetch(`${GA_BASE}/properties/${propertyId}:runRealtimeReport`, {
+    method: "POST",
+    headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`GA runRealtimeReport ${res.status}: ${await res.text()}`);
+  return (await res.json()) as { rows?: GaRow[] };
+}
+
+export async function fetchGaRealtime({
+  sa,
+  propertyId,
+}: {
+  sa: ServiceAccount;
+  propertyId: string;
+}) {
+  const token = await getAccessToken(sa);
+  const breakdown = async (dimension: string, metric: "activeUsers" | "screenPageViews", limit: number) => {
+    const report = await runRealtimeReport(token, propertyId, {
+      dimensions: [{ name: dimension }],
+      metrics: [{ name: metric }],
+      orderBys: [{ metric: { metricName: metric }, desc: true }],
+      limit,
+    });
+    return (report.rows || []).map((row) => ({
+      label: row.dimensionValues[0]?.value || "(unknown)",
+      value: +(row.metricValues[0]?.value ?? 0),
+    }));
+  };
+
+  const [totals, topPages, topCountries, devices] = await Promise.all([
+    runRealtimeReport(token, propertyId, {
+      metrics: [{ name: "activeUsers" }, { name: "screenPageViews" }],
+    }),
+    breakdown("unifiedScreenName", "screenPageViews", 5),
+    breakdown("country", "activeUsers", 5),
+    breakdown("deviceCategory", "activeUsers", 3),
+  ]);
+  const metrics = totals.rows?.[0]?.metricValues || [];
+
+  return {
+    ok: true as const,
+    error: null,
+    activeUsers: +(metrics[0]?.value ?? 0),
+    pageViews: +(metrics[1]?.value ?? 0),
+    windowMinutes: 30,
+    topPages,
+    topCountries,
+    devices,
+    generatedAt: new Date().toISOString(),
+  };
+}
+
 async function snapshotForRange(
   token: string,
   propertyId: string,

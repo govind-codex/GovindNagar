@@ -7,8 +7,15 @@ import { StyleModels, type StylingModel } from "@/constants/ui";
 import useStorage from "@/hooks/use-storage";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { Activity, Eye, RefreshCw } from "lucide-react";
 import * as React from "react";
-import type { AnalyticsResult, AnalyticsSnapshot, AnalyticsSource, RangeKey } from "~/lib/analytics/types";
+import type {
+  AnalyticsResult,
+  AnalyticsSnapshot,
+  AnalyticsSource,
+  RangeKey,
+  RealtimeAnalytics,
+} from "~/lib/analytics/types";
 import { AreaSpark } from "./_components/area-spark";
 import { BarList } from "./_components/bar-list";
 import { CountUp } from "./_components/count-up";
@@ -46,12 +53,27 @@ function useView(snapshot: AnalyticsSnapshot) {
   }, [snapshot]);
 }
 
-export default function AnalyticsClient({ result }: { result: AnalyticsResult }) {
+export default function AnalyticsClient({
+  result,
+  initialRealtime,
+}: {
+  result: AnalyticsResult;
+  initialRealtime: RealtimeAnalytics;
+}) {
   const [style] = useStorage<StylingModel>("styling.model", StyleModels[0].id);
   const [rangeKey, setRangeKey] = React.useState<RangeKey>("30d");
+  const realtime = useRealtime(initialRealtime);
   const snapshot = result.ranges[rangeKey];
   const view = useView(snapshot);
-  const shared: ViewProps = { snapshot, view, ok: result.ok, source: result.source, rangeKey, setRangeKey };
+  const shared: ViewProps = {
+    snapshot,
+    view,
+    ok: result.ok,
+    source: result.source,
+    rangeKey,
+    setRangeKey,
+    realtime,
+  };
 
   return (
     <>
@@ -78,6 +100,7 @@ type ViewProps = {
   source: AnalyticsSource;
   rangeKey: RangeKey;
   setRangeKey: (key: RangeKey) => void;
+  realtime: { data: RealtimeAnalytics; refreshing: boolean };
 };
 
 // --- shared bits ---
@@ -86,6 +109,116 @@ function ErrorBanner({ message }: { message: string }) {
     <div className="w-full border-b border-amber-500/20 bg-amber-500/[0.06] px-6 py-2.5 text-center">
       <p className="text-xs text-amber-600 dark:text-amber-400">{message}</p>
     </div>
+  );
+}
+
+function useRealtime(initial: RealtimeAnalytics) {
+  const [data, setData] = React.useState(initial);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  React.useEffect(() => {
+    let disposed = false;
+    let controller: AbortController | null = null;
+
+    const refresh = async () => {
+      if (document.visibilityState !== "visible") return;
+      controller?.abort();
+      controller = new AbortController();
+      setRefreshing(true);
+      try {
+        const response = await fetch("/api/analytics/realtime", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) return;
+        const next = (await response.json()) as RealtimeAnalytics;
+        if (!disposed) setData(next);
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error("[analytics] realtime refresh failed", error);
+        }
+      } finally {
+        if (!disposed) setRefreshing(false);
+      }
+    };
+
+    const timer = window.setInterval(refresh, 30_000);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      disposed = true;
+      controller?.abort();
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, []);
+
+  return { data, refreshing };
+}
+
+function RealtimePanel({
+  realtime: { data, refreshing },
+}: {
+  realtime: ViewProps["realtime"];
+}) {
+  return (
+    <section
+      aria-label="Realtime visitor activity"
+      className="overflow-hidden rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.035]"
+    >
+      <div className="flex flex-col gap-5 border-b border-emerald-500/15 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="relative flex size-2" aria-hidden="true">
+              {data.ok && <span className="absolute size-full animate-ping rounded-full bg-emerald-400 opacity-70" />}
+              <span className={cn("relative size-2 rounded-full", data.ok ? "bg-emerald-500" : "bg-muted-foreground/50")} />
+            </span>
+            <h2 className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground">
+              Active now
+            </h2>
+          </div>
+          <p className="mt-1.5 text-xs text-muted-foreground">
+            Aggregated activity from the last {data.windowMinutes} minutes
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          <RefreshCw className={cn("size-3", refreshing && "animate-spin")} aria-hidden="true" />
+          Refreshes every 30 seconds
+        </span>
+      </div>
+
+      {data.ok ? (
+        <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="grid grid-cols-2 gap-px bg-border/60 lg:grid-cols-1">
+            <div className="bg-background/70 p-5">
+              <Activity className="mb-4 size-4 text-emerald-500" aria-hidden="true" />
+              <p className="text-4xl font-semibold tabular-nums text-foreground">
+                <CountUp value={data.activeUsers} />
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {data.activeUsers === 1 ? "active visitor" : "active visitors"}
+              </p>
+            </div>
+            <div className="bg-background/70 p-5">
+              <Eye className="mb-4 size-4 text-sky-500" aria-hidden="true" />
+              <p className="text-4xl font-semibold tabular-nums text-foreground">
+                <CountUp value={data.pageViews} />
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">page views</p>
+            </div>
+          </div>
+          <div className="grid gap-px bg-border/60 sm:grid-cols-3">
+            <BarList title="Pages right now" items={data.topPages} color="var(--chart-1)" className="rounded-none border-0 bg-background/70" />
+            <BarList title="Live countries" items={data.topCountries} color="var(--chart-2)" className="rounded-none border-0 bg-background/70" />
+            <BarList title="Live devices" items={data.devices} color="var(--chart-4)" className="rounded-none border-0 bg-background/70" />
+          </div>
+        </div>
+      ) : (
+        <div className="p-5 text-sm text-muted-foreground">{data.error}</div>
+      )}
+    </section>
   );
 }
 
@@ -126,7 +259,7 @@ function rangeLabel(snapshot: AnalyticsSnapshot) {
 }
 
 // --- DYNAMIC ---
-function DynamicAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }: ViewProps) {
+function DynamicAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey, realtime }: ViewProps) {
   const span = rangeLabel(snapshot);
   return (
     <main className="mx-auto min-h-screen w-full max-w-app overflow-x-hidden">
@@ -159,6 +292,10 @@ function DynamicAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }:
           <RangeTabs value={rangeKey} onChange={setRangeKey} />
         </div>
       </motion.div>
+
+      <div className="mx-auto max-w-app px-6 pt-10">
+        <RealtimePanel realtime={realtime} />
+      </div>
 
       <div key={rangeKey} className="mx-auto max-w-app space-y-14 px-6 py-14">
         <motion.div
@@ -210,7 +347,7 @@ function DynamicAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }:
 }
 
 // --- MINIMAL ---
-function MinimalAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }: ViewProps) {
+function MinimalAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey, realtime }: ViewProps) {
   const span = rangeLabel(snapshot);
   return (
     <div className="mx-auto max-w-3xl space-y-12 px-6 py-16 md:py-24">
@@ -229,8 +366,12 @@ function MinimalAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }:
         </div>
       </BlurFade>
 
+      <BlurFade delay={DELAY * 2}>
+        <RealtimePanel realtime={realtime} />
+      </BlurFade>
+
       <React.Fragment key={rangeKey}>
-        <BlurFade delay={DELAY * 2}>
+        <BlurFade delay={DELAY * 3}>
           <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-y border-border py-8 md:grid-cols-4">
             {view.metrics.map((m) => (
               <div key={m.label} className="space-y-1">
@@ -273,7 +414,7 @@ function MinimalAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }:
 }
 
 // --- STATIC ---
-function StaticAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }: ViewProps) {
+function StaticAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey, realtime }: ViewProps) {
   const span = rangeLabel(snapshot);
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 @container md:py-20 md:pt-32">
@@ -296,6 +437,10 @@ function StaticAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }: 
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <RealtimePanel realtime={realtime} />
       </div>
 
       <React.Fragment key={rangeKey}>
@@ -330,7 +475,7 @@ function StaticAnalytics({ snapshot, view, ok, source, rangeKey, setRangeKey }: 
 }
 
 // --- STORY ---
-function StoryAnalytics({ snapshot, view, rangeKey, setRangeKey }: ViewProps) {
+function StoryAnalytics({ snapshot, view, rangeKey, setRangeKey, realtime }: ViewProps) {
   const best = [...snapshot.topPages].sort((a, b) => b.value - a.value)[0];
   return (
     <main className="mx-auto w-full max-w-3xl px-6 pb-24 pt-28 md:pt-36">
@@ -357,6 +502,12 @@ function StoryAnalytics({ snapshot, view, rangeKey, setRangeKey }: ViewProps) {
           ) : null}{" "}
           This is the quiet signal that tells me whether any of it is useful.
         </p>
+      </StoryReveal>
+
+      <StoryReveal delay={0.08}>
+        <div className="mt-12">
+          <RealtimePanel realtime={realtime} />
+        </div>
       </StoryReveal>
 
       <div key={rangeKey} className="mt-14 space-y-12">

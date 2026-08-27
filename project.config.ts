@@ -141,7 +141,8 @@ const appConfig = {
     site: {
       label: "govind-codex.github.io",
       source: "ga" as const,
-      measurementId: "",
+      measurementId: "G-HWWFL0WNBG",
+      streamId: "15510816135",
       propertyId: "",
     },
     projects: [] as Array<{

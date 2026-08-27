@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { appConfig } from "root/project.config";
-import { fetchGaResult, type ServiceAccount } from "./ga";
+import { fetchGaRealtime, fetchGaResult, type ServiceAccount } from "./ga";
 import {
   RANGES,
   type AnalyticsResult,
@@ -8,9 +8,11 @@ import {
   type AnalyticsTotals,
   type Growth,
   type RangeKey,
+  type RealtimeAnalytics,
 } from "./types";
 
 const REVALIDATE = 3600; // 1h; GA data isn't real-time
+const REALTIME_REVALIDATE = 30;
 
 function serviceAccount(): ServiceAccount | null {
   const raw = process.env.GA_SERVICE_ACCOUNT_KEY;
@@ -70,6 +72,30 @@ async function buildSiteData(): Promise<AnalyticsResult> {
   }
 }
 
+const emptyRealtime = (error: string): RealtimeAnalytics => ({
+  ok: false,
+  error,
+  activeUsers: 0,
+  pageViews: 0,
+  windowMinutes: 30,
+  topPages: [],
+  topCountries: [],
+  devices: [],
+  generatedAt: new Date().toISOString(),
+});
+
+async function buildRealtimeData(): Promise<RealtimeAnalytics> {
+  const sa = serviceAccount();
+  const propertyId = process.env.GA_SITE_PROPERTY_ID || appConfig.analytics.site.propertyId;
+  if (!sa || !propertyId) return emptyRealtime("Realtime analytics isn't connected yet.");
+  try {
+    return await fetchGaRealtime({ sa, propertyId });
+  } catch (error) {
+    console.error("[analytics] realtime GA fetch failed:", error);
+    return emptyRealtime("Realtime analytics is temporarily unavailable.");
+  }
+}
+
 async function buildProjectData(id: string): Promise<AnalyticsResult | null> {
   const sa = serviceAccount();
   const entry = appConfig.analytics.projects.find((p) => p.id === id);
@@ -88,6 +114,11 @@ const fetchSiteData = unstable_cache(buildSiteData, ["analytics", "site", "v2"],
   tags: ["analytics:site"],
 });
 
+const fetchRealtimeData = unstable_cache(buildRealtimeData, ["analytics", "site", "realtime", "v1"], {
+  revalidate: REALTIME_REVALIDATE,
+  tags: ["analytics:site:realtime"],
+});
+
 // Label applied after caching so multiple domains share one cached GA fetch.
 export async function getSiteResult(label: string): Promise<AnalyticsResult> {
   const data = await fetchSiteData();
@@ -95,6 +126,10 @@ export async function getSiteResult(label: string): Promise<AnalyticsResult> {
     Object.entries(data.ranges).map(([k, s]) => [k, { ...s, label }]),
   ) as Record<RangeKey, AnalyticsSnapshot>;
   return { ...data, label, ranges };
+}
+
+export function getSiteRealtimeResult(): Promise<RealtimeAnalytics> {
+  return fetchRealtimeData();
 }
 
 export function getProjectResult(id: string): Promise<AnalyticsResult | null> {
