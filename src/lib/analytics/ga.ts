@@ -132,8 +132,14 @@ async function snapshotForRange(
   label: string,
   days: number,
 ): Promise<AnalyticsSnapshot> {
+  const currentRange = { startDate: `${days - 1}daysAgo`, endDate: "today" };
+  const previousRange = {
+    startDate: `${days * 2 - 1}daysAgo`,
+    endDate: `${days}daysAgo`,
+  };
+
   const ts = await runReport(token, propertyId, {
-    dateRanges: [{ startDate: `${days}daysAgo`, endDate: "yesterday" }],
+    dateRanges: [currentRange],
     dimensions: [{ name: "date" }],
     metrics: [{ name: "activeUsers" }, { name: "screenPageViews" }, { name: "sessions" }],
     orderBys: [{ dimension: { dimensionName: "date" } }],
@@ -171,7 +177,7 @@ async function snapshotForRange(
 
   const dim = async (name: string, size = 5): Promise<AnalyticsBreakdownItem[]> => {
     const rep = await runReport(token, propertyId, {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: "yesterday" }],
+      dateRanges: [currentRange],
       dimensions: [{ name }],
       metrics: [{ name: "activeUsers" }],
       orderBys: [{ metric: { metricName: "activeUsers" }, desc: true }],
@@ -184,8 +190,8 @@ async function snapshotForRange(
   };
 
   const [totals, previousTotals, topPages, topCountries, topReferrers, devices] = await Promise.all([
-    totalsFor({ startDate: `${days}daysAgo`, endDate: "yesterday" }),
-    totalsFor({ startDate: `${days * 2}daysAgo`, endDate: `${days + 1}daysAgo` }),
+    totalsFor(currentRange),
+    totalsFor(previousRange),
     dim("pagePath"),
     dim("country"),
     dim("sessionDefaultChannelGroup"),

@@ -143,7 +143,7 @@ const appConfig = {
       source: "ga" as const,
       measurementId: "G-HWWFL0WNBG",
       streamId: "15510816135",
-      propertyId: "",
+      propertyId: "551824249",
     },
     projects: [] as Array<{
       id: string;

@@ -15,14 +15,45 @@ const REVALIDATE = 3600; // 1h; GA data isn't real-time
 const REALTIME_REVALIDATE = 30;
 
 function serviceAccount(): ServiceAccount | null {
-  const raw = process.env.GA_SERVICE_ACCOUNT_KEY;
+  const raw = process.env.GA_SERVICE_ACCOUNT_KEY?.trim();
   if (!raw) return null;
+
   try {
-    return JSON.parse(raw) as ServiceAccount;
-  } catch {
-    console.error("[analytics] GA_SERVICE_ACCOUNT_KEY is not valid JSON");
+    // Environment dashboards often make multiline JSON awkward. Accept both
+    // regular JSON and base64-encoded JSON, then restore escaped PEM newlines.
+    const json = raw.startsWith("{")
+      ? raw
+      : Buffer.from(raw, "base64").toString("utf8");
+    const parsed = JSON.parse(json) as Partial<ServiceAccount>;
+    const privateKey = parsed.private_key?.replace(/\\n/g, "\n");
+
+    if (
+      !parsed.client_email?.endsWith(".iam.gserviceaccount.com") ||
+      !privateKey?.includes("-----BEGIN PRIVATE KEY-----") ||
+      !privateKey.includes("-----END PRIVATE KEY-----")
+    ) {
+      console.error("[analytics] GA_SERVICE_ACCOUNT_KEY is missing valid client_email/private_key fields");
+      return null;
+    }
+
+    return { client_email: parsed.client_email, private_key: privateKey };
+  } catch (error) {
+    console.error("[analytics] GA_SERVICE_ACCOUNT_KEY is not valid JSON or base64 JSON", error);
     return null;
   }
+}
+
+function sitePropertyId(): string | null {
+  const raw = (process.env.GA_SITE_PROPERTY_ID || appConfig.analytics.site.propertyId).trim();
+  if (!raw) return null;
+
+  const propertyId = raw.replace(/^properties\//, "");
+  if (!/^\d+$/.test(propertyId)) {
+    console.error("[analytics] GA_SITE_PROPERTY_ID must be the numeric GA4 property ID");
+    return null;
+  }
+
+  return propertyId;
 }
 
 const zeroTotals = (): AnalyticsTotals => ({
@@ -61,9 +92,9 @@ function zeroResult(label: string, error: string): AnalyticsResult {
 async function buildSiteData(): Promise<AnalyticsResult> {
   const sa = serviceAccount();
   const cfg = appConfig.analytics.site;
-  const propertyId = process.env.GA_SITE_PROPERTY_ID || cfg.propertyId;
-  if (!sa) return zeroResult(cfg.label, "Analytics isn't connected yet.");
-  if (!propertyId) return zeroResult(cfg.label, "Analytics property isn't set yet.");
+  const propertyId = sitePropertyId();
+  if (!sa) return zeroResult(cfg.label, "Analytics credentials aren't configured correctly.");
+  if (!propertyId) return zeroResult(cfg.label, "The GA4 property ID isn't configured correctly.");
   try {
     return await fetchGaResult({ sa, propertyId, label: cfg.label });
   } catch (e) {
@@ -86,8 +117,9 @@ const emptyRealtime = (error: string): RealtimeAnalytics => ({
 
 async function buildRealtimeData(): Promise<RealtimeAnalytics> {
   const sa = serviceAccount();
-  const propertyId = process.env.GA_SITE_PROPERTY_ID || appConfig.analytics.site.propertyId;
-  if (!sa || !propertyId) return emptyRealtime("Realtime analytics isn't connected yet.");
+  const propertyId = sitePropertyId();
+  if (!sa) return emptyRealtime("Analytics credentials aren't configured correctly.");
+  if (!propertyId) return emptyRealtime("The GA4 property ID isn't configured correctly.");
   try {
     return await fetchGaRealtime({ sa, propertyId });
   } catch (error) {
