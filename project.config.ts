@@ -158,11 +158,6 @@ const appConfig = {
     npmPackages: [] as string[],
     repositories: [
       {
-        name: "asset-management-system",
-        repo: "govind-codex/asset-management-system",
-        repoBeatsUri: "",
-      },
-      {
         name: "smart-financial-planning-app",
         repo: "govind-codex/smart-financial-planning-app",
         repoBeatsUri: "",

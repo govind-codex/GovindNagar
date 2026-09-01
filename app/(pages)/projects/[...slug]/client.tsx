@@ -41,7 +41,7 @@ interface ProjectPageProps {
 
 export default function ProjectPageClient({ project, analytics, children }: ProjectPageProps) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

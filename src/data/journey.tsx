@@ -39,9 +39,8 @@ export const journey_data = [
     content: (
       <>
         <p>
-          My resume projects focus on asset management and financial planning,
-          with backend APIs, authentication, database design, and frontend to
-          backend integration.
+          My portfolio project focuses on financial planning, with backend APIs,
+          database design, business logic, and frontend-to-backend integration.
         </p>
         <TimelineProjectGrid yearFilter={["2026"]} />
       </>

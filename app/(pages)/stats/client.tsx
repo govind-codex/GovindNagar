@@ -28,7 +28,7 @@ export default function StatsPageClient({
   healthSection,
 }: StatsPageClientProps) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

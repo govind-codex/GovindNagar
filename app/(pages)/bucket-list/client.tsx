@@ -30,7 +30,7 @@ export default function BucketListClient({
   percentage,
 }: BucketListClientProps) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

@@ -31,7 +31,7 @@ interface ErrorPageClientProps {
 
 export default function ErrorPageClient({ error, reset }: ErrorPageClientProps) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

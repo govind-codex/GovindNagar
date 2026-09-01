@@ -8,7 +8,7 @@ export default function ProjectsPage() {
 export const metadata = generateMetadata({
   title: "Projects Showcase",
   description:
-    "Explore Govind Nagar's projects, including backend APIs, asset management workflows, financial planning tools, authentication, and database-backed applications.",
+    "Explore Govind Nagar's financial planning project, including backend APIs, database design, business logic, and full-stack application development.",
   path: "/projects",
   keywords: [
     "projects",

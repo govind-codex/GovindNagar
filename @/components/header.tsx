@@ -49,7 +49,7 @@ const ACTIVE_LINK = "text-foreground font-medium";
 
 export function Header({ transition }: { transition: boolean }) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
   const isMobile = useIsMobile();
@@ -559,7 +559,7 @@ function StyleSelectorPopover({
   layoutId?: string;
 }) {
   const [selectedStyle, setSelectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
   const [animationEnabled, setAnimationEnabled] = useStorage<boolean>(
@@ -724,7 +724,7 @@ function StyleSelectorPopover({
 
 function StyleSelector() {
   const [selectedStyle, setSelectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

@@ -29,7 +29,7 @@ export default function ContactPageClient({
   email,
 }: ContactPageClientProps) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

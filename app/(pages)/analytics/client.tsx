@@ -60,7 +60,7 @@ export default function AnalyticsClient({
   result: AnalyticsResult;
   initialRealtime: RealtimeAnalytics;
 }) {
-  const [style] = useStorage<StylingModel>("styling.model", StyleModels[0].id);
+  const [style] = useStorage<StylingModel>("styling.model.v2", StyleModels[0].id);
   const [rangeKey, setRangeKey] = React.useState<RangeKey>("30d");
   const realtime = useRealtime(initialRealtime);
   const snapshot = result.ranges[rangeKey];

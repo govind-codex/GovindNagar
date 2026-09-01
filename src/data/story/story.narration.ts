@@ -27,23 +27,6 @@ export const WORK_NARRATION: Record<string, StoryBeat[]> = {
 };
 
 export const PROJECT_NARRATION: Record<string, StoryBeat[]> = {
-  "asset-management-system": [
-    {
-      id: "asset-management-what",
-      heading: "What it is",
-      body: "A backend system for asset allocation, returns, tracking, lifecycle management, and reporting.",
-      scene: { kind: "headline", body: "A structured API for managing assets through their lifecycle." },
-    },
-    {
-      id: "asset-management-stack",
-      heading: "Backend design",
-      body: "It uses Node.js, Express.js, MongoDB, Mongoose, and JWT, with role-based access control and asset status validation.",
-      scene: {
-        kind: "stack",
-        items: ["Node.js", "Express.js", "MongoDB", "Mongoose", "JWT", "MVC"],
-      },
-    },
-  ],
   "smart-financial-planning-app": [
     {
       id: "financial-planning-what",

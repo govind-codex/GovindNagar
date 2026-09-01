@@ -17,7 +17,7 @@ const BLUR_FADE_DELAY = 0.04;
 
 export default function JourneyPageClient() {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

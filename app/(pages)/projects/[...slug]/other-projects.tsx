@@ -21,7 +21,7 @@ const BLUR_FADE_DELAY = 0.04;
 
 export function OtherProjects({ currentProjectId }: OtherProjectsProps) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
   const projects = getOtherProjects(currentProjectId);

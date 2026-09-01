@@ -21,7 +21,7 @@ const currentYear = new Date().getFullYear();
 
 export function FooterSection() {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

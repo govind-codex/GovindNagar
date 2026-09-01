@@ -33,7 +33,7 @@ import { ShimmeringText } from "../animated/text.shimmer";
 
 export default function Section({ orbitData }: { orbitData?: HeroOrbitPayload }) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 
@@ -256,10 +256,15 @@ function DynamicHero({ orbitData }: { orbitData?: HeroOrbitPayload } = {}) {
           {/* CTA row */}
           <motion.div layoutId="hero-cta" variants={fadeUp} className="flex flex-wrap gap-3">
             <GlowFillButton
+              asChild
               icon={ArrowRight}
               className="h-11 px-6 rounded-full font-medium text-foreground bg-muted border border-border/50 backdrop-blur-sm my-0 relative overflow-hidden"
             >
-              <TransitionLink href="/projects">View Projects</TransitionLink>
+              <TransitionLink href="/projects">
+                <span className="z-10 px-3 transition-colors duration-300 group-hover/button:text-white dark:group-hover/button:text-black motion-reduce:transition-none">
+                  View Projects
+                </span>
+              </TransitionLink>
             </GlowFillButton>
             <ButtonLink
               href={resume_link}

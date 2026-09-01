@@ -33,7 +33,7 @@ type Props = {
 
 export default function AnimatedBlogPosts({ posts, now, blogUrl }: Props) {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
 

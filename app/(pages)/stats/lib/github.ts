@@ -35,7 +35,7 @@ const repositoryQuerySchema = z.object({
 });
 
 export async function fetchRepository(
-  slug = "govind-codex/asset-management-system",
+  slug = "govind-codex/smart-financial-planning-app",
 ): Promise<GitHubRepositoryData> {
   const [owner, repo] = slug.split("/");
   const query = `query {
@@ -127,7 +127,7 @@ const starHistoryQuerySchema = z.object({
 
 export const getStarHistory = cache(
   async (
-    slug = "govind-codex/asset-management-system",
+    slug = "govind-codex/smart-financial-planning-app",
   ): Promise<GitHubStarHistory> => {
     const [owner, repo] = slug.split("/");
 

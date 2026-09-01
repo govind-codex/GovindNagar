@@ -33,7 +33,7 @@ const QUICK_STATS = [
 
 export function ContactSection() {
   const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model",
+    "styling.model.v2",
     StyleModels[0].id,
   );
   const [copied, setCopied] = useState(false);
