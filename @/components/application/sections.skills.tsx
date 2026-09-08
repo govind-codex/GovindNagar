@@ -6,13 +6,13 @@ import { StyleModels, StylingModel } from "@/constants/ui";
 import useStorage from "@/hooks/use-storage";
 import { motion } from "framer-motion";
 import { Cloud, Database, Layout, Server, Terminal } from "lucide-react";
-import Image from "next/image";
 import { appConfig } from "root/project.config";
 
 import BlurFade from "@/components/magicui/blur-fade";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { DynamicSection, StaticSection } from "./base.ui";
 import { Panel, PanelContent, PanelHeader, PanelTitle } from "./panel";
+import { getSkillLabel, SkillIcon } from "./skill-icon";
 import { BentoSkillsSection } from "./skills.bento";
 
 const BLUR_FADE_DELAY = 0.04;
@@ -88,7 +88,7 @@ function StorySkills() {
               {group.label}
             </p>
             <p className="text-sm leading-relaxed text-foreground/85">
-              {group.items.join("  ·  ")}
+              {group.items.map(getSkillLabel).join("  ·  ")}
             </p>
           </StoryReveal>
         ))}
@@ -118,17 +118,13 @@ function MinimalSkills() {
             <li key={tech} className="flex">
               <Tooltip>
                 <TooltipTrigger>
-                  <Image
-                    src={`https://skillicons.dev/icons?i=${tech}`}
-                    alt={`${tech} icon`}
-                    width={64}
-                    height={64}
+                  <SkillIcon
+                    skill={tech}
                     className="size-10 md:size-12 object-contain grayscale opacity-70 transition-all duration-500 group-hover:grayscale-0 group-hover:opacity-100"
-                    unoptimized
                   />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>{tech}</p>
+                  <p>{getSkillLabel(tech)}</p>
                 </TooltipContent>
               </Tooltip>
             </li>
@@ -179,16 +175,12 @@ function StaticSkills() {
               <ul className="flex flex-wrap gap-3">
                 {category.skills.map((skill) => (
                   <li key={skill} className="flex items-center gap-1.5 group/skill">
-                    <Image
-                      src={`https://skillicons.dev/icons?i=${skill}`}
-                      alt={`${skill} icon`}
-                      width={32}
-                      height={32}
+                    <SkillIcon
+                      skill={skill}
                       className="size-6 object-contain grayscale opacity-60 group-hover/skill:grayscale-0 group-hover/skill:opacity-100 transition-all duration-300"
-                      unoptimized
                     />
                     <span className="text-xs font-mono text-muted-foreground group-hover/skill:text-foreground transition-colors capitalize">
-                      {skill}
+                      {getSkillLabel(skill)}
                     </span>
                   </li>
                 ))}

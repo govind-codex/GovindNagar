@@ -1,256 +1,261 @@
 "use client";
 
-import BlurFade from "@/components/magicui/blur-fade";
-import { Socials } from "@/components/socials";
-import { StyleModels, StylingModel } from "@/constants/ui";
-import useStorage from "@/hooks/use-storage";
-import { motion } from "framer-motion";
-import { StyleSwap } from "@/components/animated/style-swap";
-import { Serif, StoryReveal } from "@/components/application/story.frame";
-import { ArrowUpRight, Calendar, Mail, MessageSquare } from "lucide-react";
-import dynamic from "next/dynamic";
-import Link from "next/link";
+import { Icon } from "@/components/icons";
+import { TransitionLink } from "@/components/utils/link";
+import { cn } from "@/lib/utils";
+import { motion, useReducedMotion } from "framer-motion";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  CalendarDays,
+  CheckCircle2,
+  LoaderCircle,
+  Send,
+} from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { appConfig } from "root/project.config";
 
-// Lazy-load Cal.com embed (~200KB+)
-const BookACallForm = dynamic(() => import("./book-a-call"), {
-  ssr: false,
-  loading: () => <div className="w-full h-96 animate-pulse bg-muted/40 rounded-xl" />,
-});
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const BLUR_FADE_DELAY = 0.04;
+export default function ContactPageClient() {
+  const reduceMotion = useReducedMotion();
+  const [senderEmail, setSenderEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-interface ContactPageClientProps {
-  displayName: string;
-  email: string;
-}
+  const isEmailValid = EMAIL_PATTERN.test(senderEmail);
+  const isMessageValid = message.trim().length >= 10;
+  const canSubmit = isEmailValid && isMessageValid;
 
-export default function ContactPageClient({
-  displayName,
-  email,
-}: ContactPageClientProps) {
-  const [selectedStyle] = useStorage<StylingModel>(
-    "styling.model.v2",
-    StyleModels[0].id,
-  );
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSent(false);
+
+    if (!isEmailValid) {
+      setError("Enter a valid email address.");
+      return;
+    }
+
+    if (!isMessageValid) {
+      setError("Your message needs at least 10 characters.");
+      return;
+    }
+
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: senderEmail.trim(),
+          message: message.trim(),
+          website,
+        }),
+      });
+      const result = (await response.json().catch(() => ({}))) as {
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(result.error || "Your message could not be delivered.");
+      }
+
+      setSenderEmail("");
+      setMessage("");
+      setWebsite("");
+      setSent(true);
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Your message could not be delivered. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
-    <StyleSwap swapKey={selectedStyle}>
-      {selectedStyle === "minimal" ? (
-        <MinimalContact displayName={displayName} email={email} />
-      ) : selectedStyle === "static" ? (
-        <StaticContact displayName={displayName} email={email} />
-      ) : selectedStyle === "story" ? (
-        <StoryContact displayName={displayName} email={email} />
-      ) : (
-        <DynamicContact displayName={displayName} email={email} />
-      )}
-    </StyleSwap>
-  );
-}
-
-
-function MinimalContact({ displayName, email }: ContactPageClientProps) {
-  return (
-    <section className="min-h-screen flex flex-col items-center justify-start pt-28 pb-20 px-4">
-      <div className="w-full max-w-2xl space-y-12">
-        <BlurFade delay={BLUR_FADE_DELAY}>
-          <header className="space-y-3">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-              // contact
-            </p>
-            <h1 className="text-2xl font-bold tracking-tight">Get in touch</h1>
-            <a
-              href={`mailto:${email}`}
-              className="inline-flex items-center gap-2 text-base font-mono text-muted-foreground hover:text-primary transition-colors"
-            >
-              <Mail className="size-4 shrink-0" />
-              {email}
-            </a>
-            <div className="pt-1">
-              <Socials className="items-center gap-x-1" />
-            </div>
-          </header>
-        </BlurFade>
-
-        <BlurFade delay={BLUR_FADE_DELAY * 2}>
-          <div className="space-y-3">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-              // book a call
-            </p>
-            <BookACallForm />
-          </div>
-        </BlurFade>
-      </div>
-    </section>
-  );
-}
-
-
-function StaticContact({ displayName, email }: ContactPageClientProps) {
-  return (
-    <section className="relative px-4 pt-10">
-      <div className="mt-24 mb-6 flex w-full flex-col items-center text-balance">
-        <BlurFade delay={BLUR_FADE_DELAY}>
-          <h2 className="text-shadow-glow relative z-2 text-5xl font-medium tracking-tight text-balance sm:text-5xl md:mb-36 md:text-6xl text-center !mb-0">
-            <p className="mb-3 font-mono text-xs font-normal tracking-widest text-black/80 uppercase md:text-sm dark:text-white/70">
-              Contact
-            </p>
-            <span className="font-instrument-serif">
-              <span>Get in touch</span>{" "}
-              <span className="text-colorful animate-gradient font-instrument-serif pe-2 tracking-tight italic" />
-            </span>
-          </h2>
-        </BlurFade>
-        <BlurFade delay={BLUR_FADE_DELAY * 2}>
-          <a
-            href={`mailto:${email}`}
-            className="flex items-center gap-2 py-2 font-light outline-hidden transition-all duration-300 cursor-pointer hover:text-black/60 dark:hover:text-white/90 text-xl text-black/85 dark:text-white/85 md:text-2xl"
-          >
-            {email}
-          </a>
-        </BlurFade>
-        <BlurFade delay={BLUR_FADE_DELAY * 3}>
-          <Socials className="items-center gap-x-1" />
-        </BlurFade>
-      </div>
-      <BookACallForm />
-    </section>
-  );
-}
-
-
-function StoryContact({ displayName, email }: ContactPageClientProps) {
-  return (
-    <main className="mx-auto w-full max-w-3xl px-6 pb-24 pt-28 md:pt-36">
-      <StoryReveal>
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Say hello
-        </p>
-        <h1 className="mt-3 text-4xl font-bold leading-tight tracking-tighter text-foreground md:text-5xl">
-          Let&apos;s <Serif className="text-muted-foreground/80">talk</Serif>.
-        </h1>
-        <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground">
-          I&apos;m {displayName}, and I genuinely enjoy a good conversation.
-          Whether it&apos;s a project, an idea you&apos;re chewing on, or just a
-          hello, my inbox is always open and I read every message.
-        </p>
-      </StoryReveal>
-
-      <StoryReveal delay={0.1}>
-        <div className="mt-12 flex flex-wrap items-center gap-6">
-          <a
-            href={`mailto:${email}`}
-            className="group inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
-          >
-            <Mail className="size-4 shrink-0" />
-            {email}
-            <ArrowUpRight className="size-4 opacity-70 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </a>
-          <Socials className="items-center gap-x-1" />
-        </div>
-      </StoryReveal>
-    </main>
-  );
-}
-
-
-function DynamicContact({ displayName, email }: ContactPageClientProps) {
-  return (
-    <main className="min-h-screen w-full overflow-x-hidden">
-      {/* Dot-grid */}
-      <div
-        className="pointer-events-none fixed inset-0 -z-10 opacity-[0.04]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle, currentColor 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
-
-      {/* Hero strip */}
-      <div className="w-full border-b border-border/40 pt-28 pb-16 px-6">
-        <div className="max-w-5xl mx-auto">
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="font-mono text-xs uppercase tracking-widest text-muted-foreground mb-4"
-          >
+    <main className="mx-auto min-h-dvh w-full max-w-3xl px-3 pb-24 pt-24 sm:px-6 sm:pt-28">
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="overflow-hidden border-x border-t border-border/70 bg-background"
+      >
+        <div className="border-b border-border/70 px-4 py-2.5 sm:px-5">
+          <p className="text-lg font-medium text-muted-foreground sm:text-xl">
             Contact
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-            className="text-5xl md:text-7xl font-black tracking-tighter leading-none mb-6"
-          >
-            Get in touch
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-wrap items-center gap-6"
-          >
-            <Link
-              href={`mailto:${email}`}
-              className="group inline-flex items-center gap-2 text-lg font-light text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Mail className="size-4 shrink-0 text-primary" />
-              {email}
-              <ArrowUpRight className="size-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
-            </Link>
-            <Socials className="items-center gap-x-1" />
-          </motion.div>
+          </p>
         </div>
-      </div>
 
-      {/* Cal embed section */}
-      <div className="max-w-5xl mx-auto px-6 py-16 space-y-6">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="flex items-center gap-3"
-        >
-          <Calendar className="size-4 text-primary shrink-0" />
-          <p className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">
-            Book a call
-          </p>
-        </motion.div>
+        <div className="border-b border-border/70 px-4 py-3 sm:px-5">
+          <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+            Let&apos;s talk about what you&apos;re building
+          </h1>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ delay: 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <BookACallForm />
-        </motion.div>
+        <div className="flex items-center justify-between gap-4 border-b border-border/70 px-4 py-2.5 sm:px-5">
+          <TransitionLink
+            href="/"
+            className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="size-4 transition-transform group-hover:-translate-x-0.5" />
+            Home
+          </TransitionLink>
+          <span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:text-sm">
+            <span className="size-1.5 rounded-full bg-emerald-500" />
+            Open to work
+          </span>
+        </div>
 
-        {/* Fallback CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="flex items-center gap-3 pt-4 border-t border-border/40"
-        >
-          <MessageSquare className="size-4 text-muted-foreground shrink-0" />
-          <p className="text-sm text-muted-foreground">
-            Prefer email?{" "}
-            <Link
-              href={`mailto:${email}`}
-              className="font-medium text-foreground underline underline-offset-4 hover:text-primary transition-colors"
+        <section aria-labelledby="fastest-routes-heading">
+          <div className="border-b border-border/70 px-4 py-2 sm:px-5">
+            <h2 id="fastest-routes-heading" className="text-xl font-medium sm:text-2xl">
+              Fastest routes
+            </h2>
+          </div>
+
+          <div className="grid gap-3 border-b border-border/70 p-4 sm:grid-cols-2 sm:p-6">
+            <a
+              href={appConfig.social["cal.com"]}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex min-h-16 items-center gap-3 rounded-lg bg-foreground px-3 py-2.5 text-background transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transform-none"
             >
-              Send a message directly
-            </Link>
-          </p>
-        </motion.div>
-      </div>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-background/15">
+                <CalendarDays className="size-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold">Book a 15-minute call</span>
+                <span className="block truncate text-xs opacity-65">Pick any open slot</span>
+              </span>
+              <ArrowUpRight className="size-4 shrink-0 opacity-70 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+
+            <a
+              href={appConfig.social.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex min-h-16 items-center gap-3 rounded-lg border border-border bg-card/40 px-3 py-2.5 transition-colors hover:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                <Icon name="twitter" className="size-4" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-semibold">DM me on X</span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  @{appConfig.usernames.twitter}
+                </span>
+              </span>
+              <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+          </div>
+        </section>
+
+        <section aria-labelledby="message-heading">
+          <div className="border-b border-border/70 px-4 py-2 sm:px-5">
+            <h2 id="message-heading" className="text-xl font-medium sm:text-2xl">
+              Send a message
+            </h2>
+          </div>
+
+          <form onSubmit={handleSubmit} noValidate className="space-y-5 p-4 sm:p-6">
+            <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+              Write here and it lands in my inbox. Roles, freelance work, or a
+              question about something I&apos;ve built — all welcome.
+            </p>
+
+            <div className="absolute -left-[9999px]" aria-hidden="true">
+              <label htmlFor="contact-website">Website</label>
+              <input
+                id="contact-website"
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                value={website}
+                onChange={(event) => setWebsite(event.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="contact-email" className="text-sm font-medium">
+                Your email
+              </label>
+              <input
+                id="contact-email"
+                type="email"
+                autoComplete="email"
+                value={senderEmail}
+                onChange={(event) => {
+                  setSenderEmail(event.target.value);
+                  setError(null);
+                  setSent(false);
+                }}
+                placeholder="you@example.com"
+                aria-invalid={Boolean(error && !isEmailValid)}
+                className="h-10 w-full rounded-lg border border-input bg-muted/30 px-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 aria-invalid:border-destructive"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="contact-message" className="text-sm font-medium">
+                Your message
+              </label>
+              <textarea
+                id="contact-message"
+                rows={6}
+                value={message}
+                onChange={(event) => {
+                  setMessage(event.target.value);
+                  setError(null);
+                  setSent(false);
+                }}
+                placeholder="What are you building, and where do you want help?"
+                aria-describedby="message-help contact-error"
+                aria-invalid={Boolean(error && !isMessageValid)}
+                className="min-h-32 w-full resize-y rounded-lg border border-input bg-muted/30 px-3 py-3 text-sm leading-6 outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/20 aria-invalid:border-destructive sm:min-h-36"
+              />
+              <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+                <p id="message-help">At least 10 characters so I know what you need.</p>
+                <span className={cn(message.length >= 10 && "text-emerald-500")}>
+                  {message.length}/10+
+                </span>
+              </div>
+            </div>
+
+            <div aria-live="polite" className="min-h-5 text-sm">
+              {error && <p id="contact-error" className="text-destructive">{error}</p>}
+              {sent && (
+                <p className="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle2 className="size-4" />
+                  Message sent. I&apos;ll get back to you soon.
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+              aria-busy={isSubmitting}
+              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-foreground px-5 text-sm font-medium text-background transition-all hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transform-none"
+            >
+              {isSubmitting ? (
+                <LoaderCircle className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
+              {isSubmitting ? "Sending..." : "Send message"}
+            </button>
+          </form>
+        </section>
+      </motion.div>
     </main>
   );
 }
-

@@ -5,12 +5,13 @@ import { Logo } from "@/components/logo";
 import { StyleModels, StylingModel } from "@/constants/ui";
 import useStorage from "@/hooks/use-storage";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, LayoutGroup, motion, Variants } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion, useReducedMotion, Variants } from "framer-motion";
 import { ReactLenis } from "lenis/react";
 import { useTheme } from "next-themes";
 import dynamic from "next/dynamic";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { FlickeringGrid } from "./animated/bg.flickering";
+import { SmoothCursor } from "./animated/smooth-cursor";
 import ConditionalRender from "./utils/conditional-render";
 
 // Lazy-load heavy components
@@ -61,6 +62,7 @@ export default function PageWrapper({
   const { resolvedTheme } = useTheme();
   const [animationEnabled] = useStorage("animations.enabled", false);
   const [animationMode] = useStorage("animations.mode", "stars");
+  const shouldReduceMotion = useReducedMotion();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -70,7 +72,15 @@ export default function PageWrapper({
   }, []);
 
   return (
-    <ReactLenis root options={{ lerp: 0.1, duration: 1.5, smoothWheel: true }}>
+    <ReactLenis
+      root
+      options={{
+        lerp: shouldReduceMotion ? 1 : 0.055,
+        smoothWheel: !shouldReduceMotion,
+        wheelMultiplier: shouldReduceMotion ? 1 : 0.85,
+      }}
+    >
+      <SmoothCursor />
       <LayoutGroup>
         <div
           ref={containerRef}

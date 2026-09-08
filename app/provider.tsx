@@ -2,6 +2,7 @@
 "use client";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { DocsSearchDialog } from "@/components/docs.search";
 import { cn } from "@/lib/utils";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
@@ -14,19 +15,22 @@ export function Provider({ children }: { children: React.ReactNode }) {
   return (
     <ViewTransitions>
       <TooltipProvider>
-        <RootProvider theme={{ enabled: false }}>
-          <Next13ProgressBar
-            height="4px"
-            color="var(--primary)"
-            options={{ showSpinner: true, trickle: true }}
-            showOnShallow={true}
-          />
-
-          <NextThemesProvider
-            themes={["light", "dark", "system"]}
-            defaultTheme="light"
-            attribute={["class", "data-theme"]}
+        <NextThemesProvider
+          themes={["light", "dark", "system"]}
+          defaultTheme="light"
+          attribute={["class", "data-theme"]}
+        >
+          <RootProvider
+            theme={{ enabled: false }}
+            search={{ SearchDialog: DocsSearchDialog }}
           >
+            <Next13ProgressBar
+              height="4px"
+              color="var(--primary)"
+              options={{ showSpinner: true, trickle: true }}
+              showOnShallow={true}
+            />
+
             <div
               className={cn(
                 "min-h-screen w-full h-full overflow-x-clip no-scrollbar",
@@ -34,9 +38,9 @@ export function Provider({ children }: { children: React.ReactNode }) {
             >
               <NuqsAdapter>{children}</NuqsAdapter>
             </div>
-          </NextThemesProvider>
-          <Toaster position="bottom-right" richColors />
-        </RootProvider>
+            <Toaster position="bottom-right" richColors />
+          </RootProvider>
+        </NextThemesProvider>
       </TooltipProvider>
     </ViewTransitions>
   );

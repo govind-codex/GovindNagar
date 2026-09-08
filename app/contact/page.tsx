@@ -3,12 +3,7 @@ import { generateMetadata } from "~/utils/seo";
 import ContactPageClient from "./client";
 
 export default function ContactPage() {
-  return (
-    <ContactPageClient
-      displayName={appConfig.displayName}
-      email={appConfig.emails[0]}
-    />
-  );
+  return <ContactPageClient />;
 }
 
 export const metadata = generateMetadata({

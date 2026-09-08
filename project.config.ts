@@ -30,11 +30,15 @@ const appConfig = {
   authors: [{ name: "Govind Nagar", url: "https://github.com/govind-codex" }],
 
   skills: {
-    frontend: Array.from(new Set(["html", "css", "javascript", "react"])),
-    backend: Array.from(new Set(["nodejs", "express", "javascript", "rest-api"])),
+    frontend: Array.from(
+      new Set(["html", "css", "javascript", "ts", "react", "nextjs"]),
+    ),
+    backend: Array.from(
+      new Set(["nodejs", "express", "javascript", "rest-api", "zod", "cpp"]),
+    ),
     database: Array.from(new Set(["mongodb", "mysql", "mongoose"])),
-    devops: Array.from(new Set(["git", "github", "postman"])),
-    tools: Array.from(new Set(["git", "github", "postman", "jira"])),
+    devops: Array.from(new Set(["git", "github", "postman", "vercel"])),
+    tools: Array.from(new Set(["git", "github", "postman", "jira", "vscode"])),
   },
 
   attribution: {

@@ -4,8 +4,8 @@ import { IconComponent } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { Globe } from "lucide-react";
-import Image from "next/image";
 import { SkillCategory } from "./sections.skills";
+import { getSkillLabel, SkillIcon } from "./skill-icon";
 
 export function BentoSkillsSection({
   categories,
@@ -157,15 +157,9 @@ function SkillPill({ icon }: { icon: string }) {
       )}
     >
       <div className="relative h-4 w-4 overflow-hidden rounded-[4px] grayscale opacity-60 transition-all duration-300 group-hover/pill:grayscale-0 group-hover/pill:opacity-100">
-        <Image
-          src={`https://skillicons.dev/icons?i=${icon}`}
-          alt={icon}
-          fill
-          className="object-cover"
-          unoptimized
-        />
+        <SkillIcon skill={icon} className="size-full rounded-[4px]" />
       </div>
-      <span className="capitalize">{icon}</span>
+      <span>{getSkillLabel(icon)}</span>
     </motion.div>
   );
 }

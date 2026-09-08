@@ -12,7 +12,7 @@ import { getProjectList } from "@/lib/project.source";
 import { motion } from "framer-motion";
 import { StyleSwap } from "@/components/animated/style-swap";
 import { Serif, StoryReveal } from "@/components/application/story.frame";
-import { ArrowRight, ArrowUpRight, TrendingUp } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 const BLUR_FADE_DELAY = 0.04;
 
@@ -94,14 +94,6 @@ function MinimalProjects({
 
       <BlurFade delay={BLUR_FADE_DELAY * (projects.length + 5)}>
         <div className="mt-10 flex items-center gap-4">
-          <ButtonTransitionLink
-            href="/stats"
-            variant="outline"
-            rounded="full"
-          >
-            <TrendingUp className="size-4 text-indigo-500" />
-            GitHub Stats
-          </ButtonTransitionLink>
           <ButtonTransitionLink href="/" variant="dark" rounded="full" title="Home Page">
             Back to Home
             <ArrowRight className="size-4" />
@@ -158,22 +150,13 @@ function StaticProjects({
                 // What's next
               </p>
               <h3 className="text-2xl font-bold tracking-tight">
-                Curious about the numbers?
+                Keep exploring
               </h3>
               <p className="text-sm text-muted-foreground max-w-xs">
-                See commit history, open-source stats, and GitHub activity.
+                Return home to see more of my work and experience.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-              <ButtonTransitionLink
-                href="/stats"
-                variant="outline"
-                rounded="full"
-                className="h-11 px-6"
-              >
-                <TrendingUp className="size-4 text-indigo-500" />
-                GitHub Stats
-              </ButtonTransitionLink>
               <ButtonTransitionLink
                 href="/"
                 variant="default_soft"
@@ -313,29 +296,15 @@ function DynamicProjects({
                 // What's next
               </p>
               <h3 className="text-3xl font-bold tracking-tight leading-tight">
-                Curious about
-                <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground/70 to-foreground/30">
-                  the numbers?
-                </span>
+                Keep exploring
               </h3>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto md:mx-0">
-                Commit history, open-source contributions, and GitHub activity,
-                all in one place.
+                Return home to see more of my work and experience.
               </p>
             </div>
 
             {/* Right: action cards */}
             <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-              <ButtonTransitionLink
-                href="/stats"
-                variant="outline"
-                rounded="full"
-                className="h-12 px-8 gap-2"
-              >
-                <TrendingUp className="size-4 text-indigo-500" />
-                View GitHub Stats
-              </ButtonTransitionLink>
               <ButtonTransitionLink
                 href="/"
                 variant="default_soft"

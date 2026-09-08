@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/icons";
+import DocsSearch from "@/components/docs.search";
 import { Logo } from "@/components/logo";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Socials } from "@/components/socials";
@@ -235,6 +236,8 @@ function DynamicIslandNavbar() {
           <motion.div layoutId="socials">
             <Socials className="items-center gap-x-1 border-r border-border/50 hidden md:inline-flex" />
           </motion.div>
+          <DocsSearch compact className="hidden sm:inline-flex" />
+          <DocsSearch iconOnly className="sm:hidden rounded-full" />
           <div className="flex items-center gap-1">
             <ModeToggle />
             <button
@@ -339,6 +342,8 @@ function StaticNavbar() {
 
         {/* Right capsule — actions */}
         <div className="flex items-center gap-1 px-2 py-2 rounded-full border border-border/60 bg-background/70 backdrop-blur-xl shadow-sm">
+          <DocsSearch compact className="hidden sm:inline-flex" />
+          <DocsSearch iconOnly className="sm:hidden rounded-full" />
           <motion.div layoutId="socials">
             <Socials className="hidden sm:inline-flex items-center gap-x-1 border-r border-border/50 pr-2 mr-0.5" />
           </motion.div>
@@ -467,6 +472,8 @@ function MinimalNavbar() {
         </motion.nav>
 
         <div className="flex shrink-0 items-center gap-2">
+          <DocsSearch compact className="hidden sm:inline-flex" />
+          <DocsSearch iconOnly className="sm:hidden rounded-full" />
           {/* Socials only once there's real room — on the home page this bar
               sits directly above the hero's social grid, so below xl they're
               pure duplication competing with the nav for space. */}
