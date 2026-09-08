@@ -35,7 +35,7 @@
         "./.source/*"
       ]
     },
-    "baseUrl": ".",
+    "baseUrl": " ",
     "ignoreDeprecations": "6.0",
     "target": "ES2023"
   },
