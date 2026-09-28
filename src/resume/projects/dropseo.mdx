@@ -1,0 +1,45 @@
+---
+id: "dropseo"
+title: "DropSeo"
+href: "https://drop-seo.vercel.app/"
+dates: "2026"
+active: true
+order: 1
+status: "Active"
+description: "An AI-powered website audit agent that investigates live sites and surfaces actionable SEO, accessibility, and performance findings."
+technologies:
+  - "Next.js"
+  - "TypeScript"
+  - "React"
+  - "Tailwind CSS"
+  - "Gemini"
+  - "Playwright"
+  - "Webcmd"
+  - "Drizzle ORM"
+tags:
+  - "AI Agent"
+  - "SEO Auditing"
+  - "Accessibility"
+links:
+  - label: "GitHub"
+    url: "https://github.com/govind-codex/DropSeo"
+    icon: "github"
+---
+
+DropSeo is a bounded autonomous browser agent for investigating websites. It combines AI-guided exploration with deterministic checks to produce useful, evidence-based audit findings without allowing consequential browser actions.
+
+## What it does
+
+- Audits live pages for **SEO**, **accessibility**, and **performance** issues.
+- Uses **Gemini** for adaptive planning and prioritization while keeping checks grounded in collected evidence.
+- Runs browser exploration with **Playwright** and **Webcmd**, then replays learned workflows for faster repeat investigations.
+- Compares current results with earlier runs to help verify fixes and catch regressions.
+- Applies strict navigation and action boundaries to keep autonomous browsing safe.
+
+## Architecture
+
+The application uses a modern Next.js and React interface with a server-side audit pipeline. Portable HTML analysis supports the hosted experience, while an external browser worker can provide screenshots and rendered-page evidence for deeper investigations.
+
+## Deployment
+
+The web application is deployed on **Vercel**, with support for a separate containerized browser worker and durable workflow memory when running full browser-based audits.

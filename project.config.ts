@@ -1,13 +1,14 @@
 import type { ProfilePage as ProfilePageSchema, WithContext } from "schema-dts";
 
-const githubAvatarUrl = "https://github.com/govind-codex.png?size=200";
+const profilePhotoPath = "/govind-codex.png";
+const profilePhotoUrl = "https://govind-codex.github.io/govind-codex.png";
 
 const appConfig = {
   displayName: "Govind Nagar",
   shortName: "Govind",
   initials: "GN",
   role: "Software Developer",
-  avatar: githubAvatarUrl,
+  avatar: profilePhotoPath,
   location: "Indore, Madhya Pradesh",
   description:
     "Software Developer focused on backend development, RESTful APIs, authentication, databases, and full-stack web applications.",
@@ -103,7 +104,7 @@ const appConfig = {
         "@type": "Person",
         name: "Govind Nagar",
         identifier: "govind-codex",
-        image: githubAvatarUrl,
+        image: profilePhotoUrl,
       },
       description:
         "Personal portfolio of Govind Nagar - Software Developer.",

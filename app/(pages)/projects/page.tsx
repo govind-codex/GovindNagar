@@ -8,13 +8,17 @@ export default function ProjectsPage() {
 export const metadata = generateMetadata({
   title: "Projects Showcase",
   description:
-    "Explore Govind Nagar's financial planning project, including backend APIs, database design, business logic, and full-stack application development.",
+    "Explore Govind Nagar's work across AI-powered website auditing, healthcare discovery, backend APIs, database design, and full-stack application development.",
   path: "/projects",
   keywords: [
     "projects",
     "portfolio",
     "web development",
     "full-stack",
+    "AI agents",
+    "SEO auditing",
+    "accessibility",
+    "healthcare discovery",
     "Node.js",
     "Express.js",
     "MongoDB",

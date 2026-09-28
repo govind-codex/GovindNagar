@@ -1,5 +1,33 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+const LOCAL_IMAGE_CONTENT_TYPES: Record<string, string> = {
+  ".gif": "image/gif",
+  ".jpeg": "image/jpeg",
+  ".jpg": "image/jpeg",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".webp": "image/webp",
+};
+
 export async function getRemoteImageAsBase64(url: string) {
   try {
+    if (url.startsWith("/")) {
+      const publicRoot = path.resolve(process.cwd(), "public");
+      const imagePath = path.resolve(publicRoot, url.replace(/^\/+/, ""));
+
+      if (!imagePath.startsWith(`${publicRoot}${path.sep}`)) {
+        throw new Error("Invalid local image path");
+      }
+
+      const buffer = await readFile(imagePath);
+      const contentType =
+        LOCAL_IMAGE_CONTENT_TYPES[path.extname(imagePath).toLowerCase()] ||
+        "application/octet-stream";
+
+      return `data:${contentType};base64,${buffer.toString("base64")}`;
+    }
+
     // 1. Fetch the image with Next.js caching enabled
     const res = await fetch(url, {
       cache: "force-cache", // Cache this so we don't hit the CDN every time

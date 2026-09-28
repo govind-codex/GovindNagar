@@ -6,6 +6,8 @@ import type { StoryBeat, StoryChapter } from "./story.types";
 // Flagship projects to feature, in order. Anything not listed is ignored here;
 // anything listed without narration is auto-derived from its frontmatter.
 const FEATURED_PROJECTS = [
+  "dropseo",
+  "healthconnect",
   "smart-financial-planning-app",
 ];
 

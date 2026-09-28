@@ -1,0 +1,46 @@
+---
+id: "healthconnect"
+title: "Health Connect"
+href: "https://healthconnect.org.in/"
+dates: "2026"
+active: true
+order: 2
+status: "Active"
+description: "A responsive healthcare discovery platform for finding health camps, locating nearby services, and reaching essential emergency information."
+technologies:
+  - "React 19"
+  - "TypeScript"
+  - "Vite"
+  - "Tailwind CSS"
+  - "Motion"
+  - "React Router"
+  - "Pigeon Maps"
+  - "localStorage"
+tags:
+  - "Healthcare"
+  - "Discovery Platform"
+  - "Interactive Maps"
+links:
+  - label: "GitHub"
+    url: "https://github.com/govind-codex/healthconnect"
+    icon: "github"
+---
+
+Health Connect makes essential healthcare information easier to discover. The platform brings health camps, medical services, nearby facilities, and emergency resources into one accessible, responsive experience focused on Indore.
+
+## What it does
+
+- Helps users browse upcoming and approved **health camps** from one interface.
+- Filters camps by area, available service, and current status.
+- Plots camp locations on an interactive map using **Pigeon Maps**.
+- Provides quick access to emergency helplines, hospitals, and healthcare facilities.
+- Includes separate demo dashboards for administrators and camp organizers.
+- Saves camp changes in the browser so the demo state persists after a refresh.
+
+## Experience and architecture
+
+The application is built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS**. React Router supports the public, emergency, admin, and organizer experiences, while Motion powers transitions and interactive feedback across mobile, tablet, and desktop layouts.
+
+## Current scope
+
+Health Connect is currently a frontend demonstration. Authentication is simulated through role selection, and camp data is stored with `localStorage`. A production release would require secure authentication, server-side validation, backend APIs, and database persistence before handling real healthcare or patient data.
